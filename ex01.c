@@ -28,21 +28,13 @@ int main() {
 }
 
 void formatString(char* inputLine) {
-	char newLine[500];
-	char splitted[5][500];
-	char* tok;
-	int pos = 0;
-	do {
-		tok = strtok(inputLine, "\t");
-		if(tok == NULL) break;
-		strcpy(splitted[pos], tok);
-		printf("%d - %s\n", pos, splitted[pos]);
-		pos++;
-	} while (tok != NULL);
+	char newLine[12344];
+	char cep[1234], estado[1234], cidade[1234], rua[1234];
+	sscanf(inputLine, "%[^\t]\t%[^\t]\t%[^\t]\t%[^\t]", cep, estado, cidade, rua);
 
-	printf("%s %s %s %s\n", splitted[3], splitted[2], splitted[1], splitted[0]);
-	// sprintf(newLine, "%s|%s|%s|%s\n", splitted[3], splitted[2], splitted[1], splitted[0]);
+	printf("%s|%s|%s|%s\n", cep, estado, cidade, rua);
+	
 
-	// printf("%s\n", newLine);
+	printf("%s\n", newLine);
 	// return newLine;
 }
