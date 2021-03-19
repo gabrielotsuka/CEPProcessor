@@ -25,7 +25,7 @@ int main() {
 		char newLine[150];
 		char cep[15], estado[3], cidade[39], rua[67];
 		sscanf(line, "%[^\t]\t%[^\t]\t%[^\t]\t%[^\r]", cep, estado, cidade, rua);
-		sprintf(newLine, "%s|%s|%s|%s\n", rua, cidade, estado, cep);
+		sprintf(newLine, "%s|%s|%s|%s\n", rua, cidade, estado, cep);x
 
 		fwrite(newLine, sizeof(char), sizeof(newLine), outputFile);
 	}
