@@ -2,44 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* formatString(char* inputLine);
-
 int main() {
 
 	FILE* inputFile;
-	// FILE* outputFile;
-	char line[150];
-	size_t len = 0;
-
+	FILE* outputFile;
 	inputFile = fopen("cep.txt", "r");
-	// outputFile = fopen("output.txt", "w+");
-
-	while (inputFile == NULL) {
+	outputFile = fopen("result.txt", "w");
+	while (inputFile == NULL || outputFile == NULL) {
 		printf("Falha na abertura dos arquivos\n");
 		exit(1);
 	}
 
+	char line[150], formattedLine[150];
 	while (fgets(line, 150, inputFile) != NULL) {
-		line[strlen(line)-1] = '\0';
 
-		char newLine[150];
-		char cep[15] = "", estado[3]= "", cidade[39]= "", rua[67]= "";
-		sscanf(line, "%[^\t]\t%[^\t]\t%[^\t]\t%[^\r]", cep, estado, cidade, rua);
-		sprintf(newLine, "%s|%s|%s|%s\n", rua, cidade, estado, cep);
-
-		printf("%s", newLine);
-		// fwrite(newLine, sizeof(char), sizeof(newLine), outputFile);
+		char* cep = strtok(line, "\t");
+		char* uf = strtok(NULL, "\t");
+		char* city = strtok(NULL, "\t");
+		char* street = strtok(NULL, "\n\r");
+		
+		if (street == NULL){
+			strtok(city, "\n\r");
+			sprintf(formattedLine, "%s | %s | %s\n", city, uf, cep);
+		} else {
+			sprintf(formattedLine, "%s | %s | %s | %s\n", street, city, uf, cep);
+		}
+		fwrite(formattedLine, sizeof(char), sizeof(formattedLine), outputFile);
 	}
 
 	fclose(inputFile);
-	// fclose(outputFile);
 	return 0;
 }
 
-char* formatString(char* inputLine) {
-	char * newLine;
-	char cep[15], estado[3], cidade[39], rua[67];
-	sscanf(inputLine, "%[^\t]\t%[^\t]\t%[^\t]\t%[^\r]", cep, estado, cidade, rua);
-	sprintf(newLine, "%s|%s|%s|%s\n", rua, cidade, estado, cep);
-	return newLine;
-}
