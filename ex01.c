@@ -27,9 +27,10 @@ int main() {
 		} else {
 			sprintf(formattedLine, "%s | %s | %s | %s\n", street, city, uf, cep);
 		}
-		fwrite(formattedLine, sizeof(char), sizeof(formattedLine), outputFile);
+		fprintf(outputFile, "%s", formattedLine);
 	}
 
+	fclose(outputFile);
 	fclose(inputFile);
 	return 0;
 }
