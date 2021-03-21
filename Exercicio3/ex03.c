@@ -22,6 +22,12 @@ int main() {
 		exit(1);
 	}
 
+	//escrever a posição inicial do cursos
+	int cursor = ftell(outputFile);
+	fwrite(& cursor, sizeof cursor, 1, idxFile);
+	fprintf(idxFileTxt, "%d\n", cursor);
+
+
 	char line[150], formattedLine[150];
 	while (fgets(line, 150, inputFile) != NULL) {
 		char* cep = strtok(line, "\t");
@@ -36,11 +42,12 @@ int main() {
 		} else {
 			sprintf(formattedLine, "%s | %s | %s | %s\n", street, city, uf, cep);
 		}
-		int cursor = ftell(inputFile);
-		fwrite(& cursor, sizeof cursor, 1, idxFile);
+	
 		// esse idxFileTxt é só um arquivo que eu fiz para debugar e ver se tá lendo certo
 		fprintf(idxFileTxt, "%d\n", cursor);
 		fprintf(outputFile, "%s", formattedLine);
+		cursor = ftell(outputFile);
+		fwrite(& cursor, sizeof cursor, 1, idxFile);
 	}
 
 
@@ -53,35 +60,34 @@ int main() {
 
 	// ler o índice de acordo com o número de bytes
 	int position;
-	int idx;
+	int idxStart;
+	int idxEnd;
 	// por exemplo, ler o item na terceira posição
+
 	position = 2;
-	int dataPos = fseek(idxFile, position*sizeof(int), SEEK_SET);
-	fread(&idx, sizeof(int), 1, idxFile);
-	printf("%d", idx);
+	fseek(idxFile, position*sizeof(int), SEEK_SET);
+	fread(&idxStart, sizeof(int), 1, idxFile);
+	printf("%d\n", idxStart);
+	
+	fseek(idxFile, (position+1)*sizeof(int), SEEK_SET);
+	fread(&idxEnd, sizeof(int), 1, idxFile);
+	printf("%d\n", idxEnd);
+
+	int MAXBUFFER = idxEnd - idxStart;
+	printf("%d\n", MAXBUFFER);
+
 	// pular para essa posição do cursor no arquivo resultado e ler a linha
-	fseek(outputFile, dataPos, SEEK_SET);
+	fseek(outputFile, idxStart, SEEK_SET);
 
-
-	char lineR[MAXBUFF];
-	while(1) {
-		char *c = NULL;
-		while ((c = fgets(lineR, MAXBUFF, outputFile)) != NULL) {
-			if (lineR[0] == '\n'){
-				printf("pulando linha");
-				break;
-			}
-			printf("%s", lineR);
-	    }
-		if (c ==NULL) break;
-	}
-
-
+	char buffer[MAXBUFFER];
+	int count = fread(&buffer, sizeof(char), MAXBUFFER, outputFile);
+	printf("%s\n", buffer);
 
 
 	
 	fclose(outputFile);
 	fclose(inputFile);
+	fclose(idxFile);
 	return 0;
 }
 
