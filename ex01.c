@@ -8,9 +8,13 @@ FILE* outputFile;
 
 char* formatLine(char* line);
 void transcribeCepFile(void);
+int isAlphaNum(char c);
+void removeTrailingSpaces(char *line);
 // void searchMenu(void);
 // void processOption(int option);
 void searchByCEP(void);
+
+
 
 int main() {
 
@@ -32,10 +36,29 @@ void transcribeCepFile(void) {
 
 	char line[LINE_SIZE];
 	while (fgets(line, LINE_SIZE, inputFile) != NULL) {
+ 		removeTrailingSpaces(line);
+        if(strlen(line) == 0) {
+        	continue ;
+        }
 		fprintf(outputFile, "%s", formatLine(line));
 	}
 
 	fclose(inputFile);
+}
+
+void removeTrailingSpaces(char *line) {
+    int sz = strlen(line);
+    for (int i=sz-1; i>=0; i--) {
+        if(isAlphaNum(line[i])) break;
+        line[i] = '\0'; 
+    }
+}
+
+int isAlphaNum(char c) {
+    if(c >= 'a' && c <= 'z') return 1;
+    if(c >= 'A' && c <= 'Z') return 1;
+    if(c >= '0' && c <= '9') return 1;
+    return 0;
 }
 
 char* formatLine(char* line) {
