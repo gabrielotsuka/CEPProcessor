@@ -8,15 +8,14 @@ FILE* outputFile;
 
 char* formatLine(char* line);
 void transcribeCepFile(void);
-void searchMenu(void);
-void processOption(int option);
-int hasSubstring(char* string, char* subString);
+// void searchMenu(void);
+// void processOption(int option);
 void searchByCEP(void);
 
 int main() {
 
 	transcribeCepFile();
-	searchMenu();
+	searchByCEP();
 
 	fclose(outputFile);
 	return 0;
@@ -56,64 +55,61 @@ char* formatLine(char* line) {
 	return formattedLine; 
 }
 
-void searchMenu(void) {
-	int option;
-	do {
-		printf("----Menu de busca----\n");
-		printf("|   1- CEP           |\n");
-		printf("|   2- Estado        |\n");
-		printf("|   3- Cidade        |\n");
-		printf("|   4- Logradouro    |\n");
-		printf("|   5- Sair          |\n");
-		printf("---------------------\n\n");
+// void searchMenu(void) {
+// 	char charOption[4];
+// 	int option;
+// 	do {
+// 		printf("\n\n----Menu de busca----\n");
+// 		printf("|   1- CEP           |\n");
+// 		printf("|   2- Estado        |\n");
+// 		printf("|   3- Cidade        |\n");
+// 		printf("|   4- Logradouro    |\n");
+// 		printf("|   5- Sair          |\n");
+// 		printf("---------------------\n\n");
 
-		printf("Insira o numero da opcao desejada: ");
-		scanf("%d", &option);
+// 		printf("Insira o numero da opcao desejada: ");
+// 	 	fgets(charOption, 4, stdin);
+// 	 	option = atoi(charOption);
 		
-		processOption(option);
-	} while(option != 5);
+// 		processOption(option);
+// 	} while(option != 5);
 	
-	printf("Abrass!\n");
-}
+// 	printf("Abrass!\n");
+// }
 
-void processOption(int option) {
-	switch(option) {
-		case 1:
-			searchByCEP();
-			break;
-	}
-}
+// void processOption(int option) {
+// 	switch(option) {
+// 		case 1:
+// 			searchByCEP();
+// 			break;
+// 	}
+// }
 
 void searchByCEP(void) {
 	printf("Insira o valor a ser buscado: ");
 
 	char subString[LINE_SIZE];
-	fflush(stdin);
 	fgets(subString, LINE_SIZE, stdin);
 
 	char line[LINE_SIZE], lineCopy[LINE_SIZE];
+	rewind(outputFile);
 	while (fgets(line, LINE_SIZE, outputFile) != NULL) {
 		strcpy(lineCopy, line);
-		char* street = strtok(line, "|");
+		char* street = strtok(lineCopy, "|");
 		char* city = strtok(NULL, "|");
 		char* uf = strtok(NULL, "|");
 		char* cep = strtok(NULL, "\n\r");
 	
 		if (cep == NULL){
-			if (hasSubstring(uf, lineCopy) == 1) 
-				printf("%s\n", lineCopy);
+			if (strstr(uf, subString) != NULL) {
+				printf("%s\n", line);
+				continue;
+			}
 		} 
 		else {
-			if (hasSubstring(cep, lineCopy) == 1) 
-				printf("%s\n", lineCopy);
+			if (strstr(cep, subString) != NULL) 
+				printf("%s\n", line);
 		}
 	}
 } 	
 
-
-int hasSubstring(char* string, char* subString) {
-	if (strstr(string, subString) != NULL)
-		return 1;
-	else 
-		return 0;
-}
