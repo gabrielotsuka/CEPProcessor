@@ -22,10 +22,10 @@ int main() {
 		exit(1);
 	}
 
-	//escrever a posição inicial do cursos
-	int cursor = ftell(outputFile);
+	//escrever a posição inicial do cursor
+	int cursor;
+	cursor = ftell(outputFile);
 	fwrite(& cursor, sizeof cursor, 1, idxFile);
-	fprintf(idxFileTxt, "%d\n", cursor);
 
 
 	char line[150], formattedLine[150];
@@ -64,7 +64,7 @@ int main() {
 	int idxEnd;
 	// por exemplo, ler o item na terceira posição
 
-	position = 2;
+	position = 3;
 	fseek(idxFile, position*sizeof(int), SEEK_SET);
 	fread(&idxStart, sizeof(int), 1, idxFile);
 	printf("%d\n", idxStart);
