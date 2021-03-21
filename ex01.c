@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define LINE_SIZE 150
 
@@ -8,18 +9,19 @@ FILE* outputFile;
 
 char* formatLine(char* line);
 void transcribeCepFile(void);
-int isAlphaNum(char c);
+int  isAlphaNum(char c);
 void removeTrailingSpaces(char *line);
-// void searchMenu(void);
-// void processOption(int option);
+void searchMenu(void);
+void processOption(int option);
 void searchByCEP(void);
-
-
+void searchByUF(void);
+void searchByCidade(void);
+void searchByLogradouro(void);
 
 int main() {
 
 	transcribeCepFile();
-	searchByCEP();
+	searchMenu();
 
 	fclose(outputFile);
 	return 0;
@@ -62,77 +64,162 @@ int isAlphaNum(char c) {
 }
 
 char* formatLine(char* line) {
-	char* cep = strtok(line, "\t");
-	char* uf = strtok(NULL, "\t");
-	char* city = strtok(NULL, "\t");
-	char* street = strtok(NULL, "\n\r");
-	
-	char* formattedLine = malloc(LINE_SIZE);
-	if (street == NULL){
-		strtok(city, "\n\r");
-		sprintf(formattedLine, "%s|%s|%s\n", city, uf, cep);
-	} else {
-		sprintf(formattedLine, "%s|%s|%s|%s\n", street, city, uf, cep);
-	}
+	int cep;
+    char uf[3], cidade[39], logradouro[67] = "-";
+    sscanf(line, "%d\t%[^\t]\t%[^\t]\t%[^\t]", &cep, uf, cidade, logradouro);
 
-	return formattedLine; 
+    char* formattedLine = malloc(LINE_SIZE);
+    sprintf(formattedLine, "%s|%s|%s|%d\n", logradouro, cidade, uf, cep);
+
+    return formattedLine;
 }
 
-// void searchMenu(void) {
-// 	char charOption[4];
-// 	int option;
-// 	do {
-// 		printf("\n\n----Menu de busca----\n");
-// 		printf("|   1- CEP           |\n");
-// 		printf("|   2- Estado        |\n");
-// 		printf("|   3- Cidade        |\n");
-// 		printf("|   4- Logradouro    |\n");
-// 		printf("|   5- Sair          |\n");
-// 		printf("---------------------\n\n");
+void searchMenu(void) {
+	char charOption[4];
+	int option;
+	while(1) {
+		rewind(outputFile);
+		printf("\n\n----Menu de busca----\n");
+		printf("|   1- CEP           |\n");
+		printf("|   2- UF            |\n");
+		printf("|   3- Cidade        |\n");
+		printf("|   4- Logradouro    |\n");
+		printf("|   5- Sair          |\n");
+		printf("---------------------\n\n");
 
-// 		printf("Insira o numero da opcao desejada: ");
-// 	 	fgets(charOption, 4, stdin);
-// 	 	option = atoi(charOption);
+		printf("Insira o numero da opcao desejada: ");
+	 	scanf("%d", &option);
+	 	setbuf(stdin, NULL);
 		
-// 		processOption(option);
-// 	} while(option != 5);
+		if(option == 5) break;
+		processOption(option);
+	}
 	
-// 	printf("Abrass!\n");
-// }
+	printf("Abrass!\n");
+}
 
-// void processOption(int option) {
-// 	switch(option) {
-// 		case 1:
-// 			searchByCEP();
-// 			break;
-// 	}
-// }
+void processOption(int option) {
+	switch(option) {
+		case 1:
+			searchByCEP();
+			break;
+		case 2:
+			searchByUF();
+			break;
+		case 3:
+			searchByCidade();
+			break;
+		case 4:
+			searchByLogradouro();
+			break;
+		default:
+			printf("Opcao invalida!\n");
+	}
+}
 
 void searchByCEP(void) {
-	printf("Insira o valor a ser buscado: ");
+	printf("Insira o cep para busca: ");
+	char cepStr[LINE_SIZE];
+	fgets(cepStr, LINE_SIZE, stdin);
+	int targetCEP = atoi(cepStr);
+	printf("\nEnderecos encontrados:\n");
 
-	char subString[LINE_SIZE];
-	fgets(subString, LINE_SIZE, stdin);
-
-	char line[LINE_SIZE], lineCopy[LINE_SIZE];
-	rewind(outputFile);
+	char line[LINE_SIZE];
+	int flagFound = 0;
 	while (fgets(line, LINE_SIZE, outputFile) != NULL) {
-		strcpy(lineCopy, line);
-		char* street = strtok(lineCopy, "|");
-		char* city = strtok(NULL, "|");
-		char* uf = strtok(NULL, "|");
-		char* cep = strtok(NULL, "\n\r");
-	
-		if (cep == NULL){
-			if (strstr(uf, subString) != NULL) {
-				printf("%s\n", line);
-				continue;
-			}
-		} 
-		else {
-			if (strstr(cep, subString) != NULL) 
-				printf("%s\n", line);
-		}
-	}
-} 	
+		int cep;
+	    char uf[3], cidade[39], logradouro[67];
+	    sscanf(line, "%[^|]|%[^|]|%[^|]|%d", logradouro, cidade, uf, &cep);
 
+	    if(cep == targetCEP) {
+    		printf("%s|%s|%s|%d\n", logradouro, cidade, uf, cep);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByUF(void) {
+	printf("Insira o codigo UF para busca: ");
+	char ufStr[3];
+	fgets(ufStr, 3, stdin);
+
+	for(int i = 0; i < strlen(ufStr); i++) 
+		ufStr[i] = toupper(ufStr[i]);
+
+	printf("\nEnderecos encontrados:\n");
+	char line[LINE_SIZE];
+	int flagFound = 0;
+	while (fgets(line, LINE_SIZE, outputFile) != NULL) {
+		int cep;
+	    char uf[3], cidade[39], logradouro[67];
+	    sscanf(line, "%[^|]|%[^|]|%[^|]|%d", logradouro, cidade, uf, &cep);
+	    if(strcmp(uf, ufStr) == 0) {
+    		printf("%s|%s|%s|%d\n", logradouro, cidade, uf, cep);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByCidade(void) {
+	printf("Insira o prefixo da cidade para busca: ");
+	char cidadeStr[39];
+	fgets(cidadeStr, 39, stdin);
+
+	for(int i = 0; i < strlen(cidadeStr); i++) 
+		cidadeStr[i] = toupper(cidadeStr[i]);
+	cidadeStr[strlen(cidadeStr) - 1] = '\0';
+
+	printf("\nEnderecos encontrados:\n");
+
+	char line[LINE_SIZE];
+	int flagFound = 0;
+	while (fgets(line, LINE_SIZE, outputFile) != NULL) {
+		int cep;
+	    char uf[3], cidade[39], logradouro[67];
+	    sscanf(line, "%[^|]|%[^|]|%[^|]|%d", logradouro, cidade, uf, &cep);
+	    if(strstr(cidade, cidadeStr) != NULL) {
+    		printf("%s|%s|%s|%d\n", logradouro, cidade, uf, cep);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByLogradouro(void) {
+	printf("Insira o prefixo do logradouro para busca: ");
+	char logradouroStr[67];
+	fgets(logradouroStr, 67, stdin);
+
+	for(int i = 0; i < strlen(logradouroStr); i++) 
+		logradouroStr[i] = toupper(logradouroStr[i]);
+	logradouroStr[strlen(logradouroStr) - 1] = '\0';
+
+	printf("\nEnderecos encontrados:\n");
+
+	char line[LINE_SIZE];
+	int flagFound = 0;
+	while (fgets(line, LINE_SIZE, outputFile) != NULL) {
+		int cep;
+	    char uf[3], cidade[39], logradouro[67];
+	    sscanf(line, "%[^|]|%[^|]|%[^|]|%d", logradouro, cidade, uf, &cep);
+	    if(strstr(logradouro, logradouroStr) != NULL) {
+    		printf("%s|%s|%s|%d\n", logradouro, cidade, uf, cep);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
