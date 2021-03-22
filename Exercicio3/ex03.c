@@ -41,8 +41,8 @@ void proessSearch(void) {
 	// pular para essa posição do cursor no arquivo resultado e ler a linha
 	fseek(dataFile, idxStart, SEEK_SET);
 
-	char buffer[MAXBUFFER];
-	int count = fread(&buffer, sizeof(char), MAXBUFFER, dataFile);
+	char buffer[MAXBUFFER+1];
+	fgets(buffer, MAXBUFFER+1, dataFile);
 	printf("=======================\n");
 	printf("%s\n", buffer);
 	printf("=======================\n");
