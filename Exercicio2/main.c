@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 struct item {
     int cep;
@@ -58,7 +59,120 @@ void findEntry(FILE * inputFile, int position) {
     displayEntry(entry);
 }
 
-void searchMenu(FILE* outputFile) {
+void searchByCEP(FILE * inputFile) {
+	printf("Insira o cep para busca: ");
+	int targetCep;
+	scanf("%d", &targetCep);
+	setbuf(stdin, NULL);
+	printf("\nEnderecos encontrados:\n");
+
+	struct item entry;
+	int flagFound = 0;
+	while (fread(&entry, sizeof(struct item), 1, inputFile)) {
+	    if(entry.cep == targetCep) {
+    		displayEntry(entry);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByUF(FILE * inputFile) {
+	printf("Insira o codigo UF para busca: ");
+	char ufStr[3];
+	fgets(ufStr, 3, stdin);
+
+	for(int i = 0; i < strlen(ufStr); i++) 
+		ufStr[i] = toupper(ufStr[i]);
+
+	printf("\nEnderecos encontrados:\n");
+	struct item entry;
+	int flagFound = 0;
+	while (fread(&entry, sizeof(struct item), 1, inputFile)) {
+	    if(strcmp(entry.uf, ufStr) == 0) {
+    		displayEntry(entry);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByCidade(FILE* inputFile) {
+	printf("Insira a substring da cidade para busca: ");
+	char cidadeStr[39];
+	fgets(cidadeStr, 39, stdin);
+
+	for(int i = 0; i < strlen(cidadeStr); i++) 
+		cidadeStr[i] = toupper(cidadeStr[i]);
+	cidadeStr[strlen(cidadeStr) - 1] = '\0';
+
+	printf("\nEnderecos encontrados:\n");
+
+	struct item entry;
+	int flagFound = 0;
+	while (fread(&entry, sizeof(struct item), 1, inputFile)) {
+	    if(strstr(entry.cidade, cidadeStr) != NULL) {
+    		displayEntry(entry);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void searchByLogradouro(FILE* inputFile) {
+	printf("Insira a substring do logradouro para busca: ");
+	char logradouroStr[67];
+	fgets(logradouroStr, 67, stdin);
+
+	for(int i = 0; i < strlen(logradouroStr); i++) 
+		logradouroStr[i] = toupper(logradouroStr[i]);
+	logradouroStr[strlen(logradouroStr) - 1] = '\0';
+
+	printf("\nEnderecos encontrados:\n");
+
+	struct item entry;
+	int flagFound = 0;
+	while (fread(&entry, sizeof(struct item), 1, inputFile)) {
+	    if(strstr(entry.logradouro, logradouroStr) != NULL) {
+    		displayEntry(entry);
+			flagFound = 1;
+	    }
+	}
+
+	if(flagFound == 0) {
+		printf("Nenhum :(\n");
+	}
+}
+
+void processOption(FILE* inputFile, int option) {
+	switch(option) {
+		case 1:
+			searchByCEP(inputFile);
+			break;
+		case 2:
+			searchByUF(inputFile);
+			break;
+		case 3:
+			searchByCidade(inputFile);
+			break;
+		case 4:
+			searchByLogradouro(inputFile);
+			break;
+		default:
+			printf("Opcao invalida!\n");
+	}
+}
+
+void searchMenu(FILE* inputFile) {
     int repeat = 2;
     do {
         puts("Escolha o tipo de busca que deseja fazer:");
@@ -68,31 +182,28 @@ void searchMenu(FILE* outputFile) {
         scanf("%d", &searchOption);
 
         if(searchOption == 1) {
-            puts("Escolha por que atributo deseja buscar sequencialmente:");
-            puts("1 - CEP");
-            puts("2 - UF");
-            puts("3 - Cidade");
-            puts("4 - Logradouro");
-            int attributeOption;
-            scanf("%d", &attributeOption);
-            if(attributeOption == 1) {
-                
-            }
-            else if(attributeOption == 2) {
+            rewind(inputFile);
+            int option;
+            printf("\n\n----Menu de busca----\n");
+            printf("|   1- CEP           |\n");
+            printf("|   2- UF            |\n");
+            printf("|   3- Cidade        |\n");
+            printf("|   4- Logradouro    |\n");
+            printf("|   5- Sair          |\n");
+            printf("---------------------\n\n");
 
-            }
-            else if(attributeOption == 3) {
-
-            }
-            else {
-
-            }
+            printf("Insira o numero da opcao desejada: ");
+            scanf("%d", &option);
+            setbuf(stdin, NULL);
+            
+            if(option == 5) break;
+            processOption(inputFile, option);
         }
         else {
             puts("Digite a posição que deseja encontrar (a partir de 1)");
             int position;
             scanf("%d", &position);
-            findEntry(outputFile, position);
+            findEntry(inputFile, position);
         }
 
         puts("Você deseja fazer outra consulta? (1 - Sim | 2 - Nao)");
