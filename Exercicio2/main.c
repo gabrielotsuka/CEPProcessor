@@ -1,3 +1,8 @@
+/*
+	Gabriel José Bueno Otsuka - 11721BCC018
+	Marcos Felipe Belisário Costa - 11811BCC020
+	Pedro Henrique Bufulin de Almeida - 11711BCC028
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
